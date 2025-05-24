@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Frontend for IC Vibe application",
   "scripts": {
+    "dev": "vite",
     "start": "vite",
     "build": "dfx generate && tsc && vite build",
     "test": "vitest run"

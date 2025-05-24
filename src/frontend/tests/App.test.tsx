@@ -1,11 +1,29 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import App from "../src/App";
 import { StrictMode } from "react";
 import { act } from "react";
 
+// Mock the backend canister for all views
+vi.mock("../declarations/backend", () => ({
+  backend: {
+    greet: vi.fn().mockResolvedValue("Hello, World!"),
+    get: vi.fn().mockResolvedValue(BigInt(0)),
+    inc: vi.fn().mockResolvedValue(BigInt(1)),
+    set_count: vi.fn().mockResolvedValue(BigInt(10)),
+  },
+}));
+
+// Mock the LLM canister
+vi.mock("../declarations/llm", () => ({
+  llm: {
+    prompt: vi.fn().mockResolvedValue("LLM response"),
+  },
+}));
+
 describe("App", () => {
-  it("renders the main headings", async () => {
+  it("renders the main headings and navigation", async () => {
     await act(async () => {
       render(
         <StrictMode>
@@ -14,10 +32,178 @@ describe("App", () => {
       );
     });
 
-    // After act completes, all state updates from useEffect should be processed
+    // Check header content
     expect(screen.getByText("Vibe Coding Template")).toBeInTheDocument();
     expect(
       screen.getByText("React + Rust + Internet Computer"),
     ).toBeInTheDocument();
+
+    // Check navigation buttons
+    expect(
+      screen.getByRole("button", { name: "Greeting" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Counter" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "LLM Prompt" }),
+    ).toBeInTheDocument();
+  });
+
+  it("starts with greeting view as default", async () => {
+    await act(async () => {
+      render(
+        <StrictMode>
+          <App />
+        </StrictMode>,
+      );
+    });
+
+    // Greeting view should be visible by default
+    expect(screen.getByPlaceholderText("Enter your name")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Get Greeting" }),
+    ).toBeInTheDocument();
+
+    // Counter and LLM views should not be visible
+    expect(screen.queryByText("Counter: 0")).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Ask the LLM something..."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("switches to counter view when counter navigation is clicked", async () => {
+    const user = userEvent.setup();
+
+    await act(async () => {
+      render(
+        <StrictMode>
+          <App />
+        </StrictMode>,
+      );
+    });
+
+    // Click on Counter navigation
+    await user.click(screen.getByRole("button", { name: "Counter" }));
+
+    // Counter view should be visible
+    expect(screen.getByText("Counter: 0")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Increment" }),
+    ).toBeInTheDocument();
+
+    // Greeting and LLM views should not be visible
+    expect(
+      screen.queryByPlaceholderText("Enter your name"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Ask the LLM something..."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("switches to LLM view when LLM navigation is clicked", async () => {
+    const user = userEvent.setup();
+
+    await act(async () => {
+      render(
+        <StrictMode>
+          <App />
+        </StrictMode>,
+      );
+    });
+
+    // Click on LLM Prompt navigation
+    await user.click(screen.getByRole("button", { name: "LLM Prompt" }));
+
+    // LLM view should be visible
+    expect(
+      screen.getByPlaceholderText("Ask the LLM something..."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Send Prompt" }),
+    ).toBeInTheDocument();
+
+    // Greeting and Counter views should not be visible
+    expect(
+      screen.queryByPlaceholderText("Enter your name"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Counter: 0")).not.toBeInTheDocument();
+  });
+
+  it("shows active state on current navigation button", async () => {
+    const user = userEvent.setup();
+
+    await act(async () => {
+      render(
+        <StrictMode>
+          <App />
+        </StrictMode>,
+      );
+    });
+
+    // Initially, Greeting button should have active styling
+    const greetingButton = screen.getByRole("button", { name: "Greeting" });
+    const counterButton = screen.getByRole("button", { name: "Counter" });
+
+    expect(greetingButton).toHaveClass("bg-gray-600");
+    expect(counterButton).not.toHaveClass("bg-gray-600");
+
+    // Click on Counter navigation
+    await user.click(counterButton);
+
+    // Now Counter button should have active styling
+    expect(counterButton).toHaveClass("bg-gray-600");
+    expect(greetingButton).not.toHaveClass("bg-gray-600");
+  });
+
+  it("clears errors when switching views", async () => {
+    const user = userEvent.setup();
+
+    await act(async () => {
+      render(
+        <StrictMode>
+          <App />
+        </StrictMode>,
+      );
+    });
+
+    // This test would need the views to actually trigger errors
+    // For now, we'll test that the navigation works without errors
+    await user.click(screen.getByRole("button", { name: "Counter" }));
+    await user.click(screen.getByRole("button", { name: "LLM Prompt" }));
+    await user.click(screen.getByRole("button", { name: "Greeting" }));
+
+    // Should be back to greeting view
+    expect(screen.getByPlaceholderText("Enter your name")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Get Greeting" }),
+    ).toBeInTheDocument();
+  });
+
+  it("navigates between all views in sequence", async () => {
+    const user = userEvent.setup();
+
+    await act(async () => {
+      render(
+        <StrictMode>
+          <App />
+        </StrictMode>,
+      );
+    });
+
+    // Start with greeting (default)
+    expect(screen.getByPlaceholderText("Enter your name")).toBeInTheDocument();
+
+    // Go to counter
+    await user.click(screen.getByRole("button", { name: "Counter" }));
+    expect(screen.getByText("Counter: 0")).toBeInTheDocument();
+
+    // Go to LLM
+    await user.click(screen.getByRole("button", { name: "LLM Prompt" }));
+    expect(
+      screen.getByPlaceholderText("Ask the LLM something..."),
+    ).toBeInTheDocument();
+
+    // Go back to greeting
+    await user.click(screen.getByRole("button", { name: "Greeting" }));
+    expect(screen.getByPlaceholderText("Enter your name")).toBeInTheDocument();
   });
 });

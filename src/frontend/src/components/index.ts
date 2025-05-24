@@ -2,6 +2,7 @@
 export * from "./Button";
 export * from "./Card";
 export * from "./ErrorDisplay";
+export * from "./Header";
 export * from "./InputField";
 export * from "./Loader";
 export * from "./TextArea";
