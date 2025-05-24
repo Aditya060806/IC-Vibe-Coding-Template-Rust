@@ -6,12 +6,16 @@ interface HeaderProps {
   className?: string;
   currentView: ViewType;
   onViewChange: (view: ViewType) => void;
+  isSignedIn: boolean;
+  onSignInToggle: () => void;
 }
 
 export function Header({
   className = "",
   currentView,
   onViewChange,
+  isSignedIn,
+  onSignInToggle,
 }: HeaderProps) {
   const logoStyle = {
     animation: "logo-spin 60s linear infinite",
@@ -60,24 +64,36 @@ export function Header({
           </div>
 
           {/* Right side: Navigation */}
-          <nav className="flex space-x-6">
+          <nav className="flex items-center space-x-6">
+            <div className="flex space-x-4">
+              <button
+                onClick={() => onViewChange("greeting")}
+                className={getButtonClassName("greeting")}
+              >
+                Greeting
+              </button>
+              {isSignedIn && (
+                <button
+                  onClick={() => onViewChange("counter")}
+                  className={getButtonClassName("counter")}
+                >
+                  Counter
+                </button>
+              )}
+              <button
+                onClick={() => onViewChange("llm")}
+                className={getButtonClassName("llm")}
+              >
+                LLM Prompt
+              </button>
+            </div>
+
+            {/* Sign In/Out Button */}
             <button
-              onClick={() => onViewChange("greeting")}
-              className={getButtonClassName("greeting")}
+              onClick={onSignInToggle}
+              className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
             >
-              Greeting
-            </button>
-            <button
-              onClick={() => onViewChange("counter")}
-              className={getButtonClassName("counter")}
-            >
-              Counter
-            </button>
-            <button
-              onClick={() => onViewChange("llm")}
-              className={getButtonClassName("llm")}
-            >
-              LLM Prompt
+              {isSignedIn ? "Sign Out" : "Sign In"}
             </button>
           </nav>
         </div>
