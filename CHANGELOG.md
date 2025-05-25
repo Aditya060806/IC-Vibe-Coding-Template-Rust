@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add per-principal counter system with stable storage for persistent user-specific counters
 - Add NFID Wallet authentication using Identity Kit for secure user login
 - Add sign-in/sign-out authentication state management with counter access control
 - Add navigation header with logo, title, and links to main sections
