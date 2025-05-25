@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Import components and views
 import { Loader, ErrorDisplay, Header, ViewType } from "./components";
 import { GreetingView, CounterView, LlmPromptView } from "./views";
+import { useAuth } from "./hooks";
 
 function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [currentView, setCurrentView] = useState<ViewType>("greeting");
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const { isSignedIn } = useAuth();
+
+  // Handle automatic view switching when user logs out
+  useEffect(() => {
+    // If user logs out and is currently on counter view, switch to greeting
+    if (!isSignedIn && currentView === "counter") {
+      setCurrentView("greeting");
+    }
+  }, [isSignedIn, currentView]);
 
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
@@ -21,16 +30,6 @@ function App() {
     }
     setCurrentView(view);
     setError(undefined); // Clear any existing errors when switching views
-  };
-
-  const handleSignInToggle = () => {
-    const newSignedInState = !isSignedIn;
-    setIsSignedIn(newSignedInState);
-
-    // If signing out and currently on counter view, switch to greeting
-    if (!newSignedInState && currentView === "counter") {
-      setCurrentView("greeting");
-    }
   };
 
   const renderCurrentView = () => {
@@ -53,7 +52,6 @@ function App() {
         currentView={currentView}
         onViewChange={handleViewChange}
         isSignedIn={isSignedIn}
-        onSignInToggle={handleSignInToggle}
       />
 
       {/* Main Content */}

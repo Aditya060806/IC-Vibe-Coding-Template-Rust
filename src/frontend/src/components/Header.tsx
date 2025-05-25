@@ -1,4 +1,5 @@
 import ReactIcon from "../../assets/React-icon.webp";
+import { ConnectWallet } from "@nfid/identitykit/react";
 
 export type ViewType = "greeting" | "counter" | "llm";
 
@@ -7,7 +8,6 @@ interface HeaderProps {
   currentView: ViewType;
   onViewChange: (view: ViewType) => void;
   isSignedIn: boolean;
-  onSignInToggle: () => void;
 }
 
 export function Header({
@@ -15,7 +15,6 @@ export function Header({
   currentView,
   onViewChange,
   isSignedIn,
-  onSignInToggle,
 }: HeaderProps) {
   const logoStyle = {
     animation: "logo-spin 60s linear infinite",
@@ -88,13 +87,8 @@ export function Header({
               </button>
             </div>
 
-            {/* Sign In/Out Button */}
-            <button
-              onClick={onSignInToggle}
-              className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              {isSignedIn ? "Sign Out" : "Sign In"}
-            </button>
+            {/* NFID Identity Kit Connect Wallet */}
+            <ConnectWallet />
           </nav>
         </div>
       </header>

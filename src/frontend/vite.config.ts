@@ -42,8 +42,19 @@ export default defineConfig({
         find: "declarations",
         replacement: fileURLToPath(new URL("../declarations", import.meta.url)),
       },
+      // Add alias for Identity Kit to fix test resolution
+      {
+        find: "@nfid/identitykit/react",
+        replacement: fileURLToPath(
+          new URL(
+            "../../node_modules/@nfid/identitykit/dist/libs/react/index.esm.js",
+            import.meta.url,
+          ),
+        ),
+      },
     ],
     dedupe: ["@dfinity/agent"],
+    conditions: ["import", "module", "browser", "default"],
   },
   test: {
     environment: "jsdom",

@@ -24,8 +24,6 @@ Please follow a Spec Driven Development workflow. Here are explicit steps for yo
 1. Planning:
    1. Ensure you fully understand the problem, feel free to ask a few clarification questions.
    2. **CRITICAL PAUSE POINT** - STOP HERE and wait for human answers before continuing!
-   3. If the feature is complex, break it down into smaller and numerated tasks.
-   4. Do the rest of the workflow PER task.
 2. Update the changelog with one entry of the requested feature.
 3. Implement Tests:
    1. If needed, create a new method on backend canister without actual logic.

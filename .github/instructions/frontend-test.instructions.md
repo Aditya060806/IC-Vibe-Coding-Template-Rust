@@ -9,10 +9,12 @@ When writing tests for frontend components:
 - Use Vitest and React Testing Library for testing React components
 - Follow the existing test structure with describe/it blocks
 - Include setup, execution, and assertion phases in each test
-- Test both happy path and edge cases
+- Test happy path and ONLY important or mentioned edge cases
 - Use descriptive test names that explain the expected behavior
 - Use mocks for backend canister functions when testing frontend components
 - IMPORTANT: avoid creating tests on simple components, prefer to test them at view level.
+- IMPORTANT: avoid redundant tests, whose result is already covered by other tests.
+- Remember that every test must be worth it's maintenance, else it should be deleted.
 
 Example test structure:
 
