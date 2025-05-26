@@ -2,14 +2,27 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { StrictMode } from "react";
 import { GreetingView } from "../../src/views/GreetingView";
-import { backendService } from "../../src/services/backendService";
 import userEvent from "@testing-library/user-event";
 
-// Mock the backendService
+// Mock the useBackendActors hook
+const mockService = {
+  greet: vi.fn().mockResolvedValue("Hello, Test User!"),
+  getCount: vi.fn(),
+  incrementCounter: vi.fn(),
+  sendLlmPrompt: vi.fn(),
+};
+
 vi.mock("../../src/services/backendService", () => ({
-  backendService: {
-    greet: vi.fn().mockResolvedValue("Hello, Test User!"),
-  },
+  createBackendService: vi.fn(() => mockService),
+}));
+
+vi.mock("../../src/hooks/useBackendActors", () => ({
+  useBackendActors: vi.fn(() => ({
+    authenticatedActor: {} as any,
+    unauthenticatedActor: {} as any,
+    isReady: true,
+    isAuthenticated: false,
+  })),
 }));
 
 describe("GreetingView", () => {
@@ -49,7 +62,7 @@ describe("GreetingView", () => {
 
     // Assert
     expect(mockSetLoading).toHaveBeenCalledWith(true);
-    expect(backendService.greet).toHaveBeenCalledWith("Test User");
+    expect(mockService.greet).toHaveBeenCalledWith("Test User");
     expect(await screen.findByText("Hello, Test User!")).toBeInTheDocument();
     expect(mockSetLoading).toHaveBeenLastCalledWith(false);
   });
@@ -57,9 +70,7 @@ describe("GreetingView", () => {
   it("should handle error when service call fails", async () => {
     // Setup - override mock to throw an error
     const errorMessage = "Failed to fetch greeting";
-    vi.mocked(backendService.greet).mockRejectedValueOnce(
-      new Error(errorMessage),
-    );
+    vi.mocked(mockService.greet).mockRejectedValueOnce(new Error(errorMessage));
 
     render(
       <StrictMode>

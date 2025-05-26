@@ -22,6 +22,26 @@ vi.mock("../declarations/llm", () => ({
   },
 }));
 
+// Mock the useBackendActors hook to prevent HttpAgent creation during tests
+vi.mock("../src/hooks/useBackendActors", () => ({
+  useBackendActors: () => ({
+    unauthenticatedActor: {
+      greet: vi.fn().mockResolvedValue("Hello, World!"),
+      get: vi.fn().mockResolvedValue(BigInt(0)),
+      inc: vi.fn().mockResolvedValue(BigInt(1)),
+      set_count: vi.fn().mockResolvedValue(BigInt(10)),
+    },
+    authenticatedActor: {
+      greet: vi.fn().mockResolvedValue("Hello, World!"),
+      get: vi.fn().mockResolvedValue(BigInt(0)),
+      inc: vi.fn().mockResolvedValue(BigInt(1)),
+      set_count: vi.fn().mockResolvedValue(BigInt(10)),
+    },
+    isReady: true,
+    isAuthenticated: false,
+  }),
+}));
+
 // Declare mock variables first (hoisted)
 const mockConnect = vi.fn();
 const mockDisconnect = vi.fn();
@@ -36,6 +56,7 @@ vi.mock("@nfid/identitykit/react", () => ({
     children,
   ConnectWallet: () => <button>Connect Wallet</button>,
   useAuth: () => mockUseAuth(),
+  useAgent: () => null, // Mock useAgent for useBackendActors hook
 }));
 
 describe("App Authentication", () => {

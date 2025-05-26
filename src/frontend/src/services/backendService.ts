@@ -58,28 +58,3 @@ export const createBackendService = (
     return await unauthenticatedActor.prompt(prompt);
   },
 });
-
-// Legacy export for backward compatibility
-// This will be removed after updating all components
-export const backendService = {
-  async greet(_name: string): Promise<string> {
-    throw new Error(
-      "Legacy backend service no longer supported. Use authenticated service.",
-    );
-  },
-  async getCount(): Promise<bigint> {
-    throw new Error(
-      "Legacy backend service no longer supported. Use authenticated service.",
-    );
-  },
-  async incrementCounter(): Promise<bigint> {
-    throw new Error(
-      "Legacy backend service no longer supported. Use authenticated service.",
-    );
-  },
-  async sendLlmPrompt(_prompt: string): Promise<string> {
-    throw new Error(
-      "Legacy backend service no longer supported. Use authenticated service.",
-    );
-  },
-};

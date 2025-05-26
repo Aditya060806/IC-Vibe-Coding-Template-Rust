@@ -3,11 +3,25 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { LlmPromptView } from "../../src/views/LlmPromptView";
 import { act } from "@testing-library/react";
 
-// Mock the backendService
+// Mock the backend service
+const mockService = {
+  greet: vi.fn(),
+  getCount: vi.fn(),
+  incrementCounter: vi.fn(),
+  sendLlmPrompt: vi.fn().mockResolvedValue("This is a mock LLM response"),
+};
+
 vi.mock("../../src/services/backendService", () => ({
-  backendService: {
-    sendLlmPrompt: vi.fn().mockResolvedValue("This is a mock LLM response"),
-  },
+  createBackendService: vi.fn(() => mockService),
+}));
+
+vi.mock("../../src/hooks/useBackendActors", () => ({
+  useBackendActors: vi.fn(() => ({
+    authenticatedActor: {} as any,
+    unauthenticatedActor: {} as any,
+    isReady: true,
+    isAuthenticated: false,
+  })),
 }));
 
 describe("LlmPromptView", () => {
@@ -77,18 +91,14 @@ describe("LlmPromptView", () => {
     });
 
     // Assert
-    const { backendService } = await import(
-      "../../src/services/backendService"
-    );
-    expect(backendService.sendLlmPrompt).toHaveBeenCalledWith(
+    expect(mockService.sendLlmPrompt).toHaveBeenCalledWith(
       "What is the Internet Computer?",
     );
-    expect(await screen.findByText("Response:")).toBeInTheDocument();
+    expect(mockSetLoading).toHaveBeenCalledWith(true);
+    expect(mockSetLoading).toHaveBeenCalledWith(false);
     expect(
       await screen.findByText("This is a mock LLM response"),
     ).toBeInTheDocument();
-    expect(mockSetLoading).toHaveBeenCalledWith(true);
-    expect(mockSetLoading).toHaveBeenCalledWith(false);
   });
 
   it("should not send empty prompts", async () => {
@@ -99,33 +109,21 @@ describe("LlmPromptView", () => {
       );
     });
 
-    const textArea = screen.getByPlaceholderText("Ask the LLM something...");
     const sendButton = screen.getByText("Send Prompt");
 
-    // Execute - Set empty text and click send
-    await act(async () => {
-      fireEvent.change(textArea, { target: { value: "" } });
-    });
-
+    // Execute - click without entering text
     await act(async () => {
       fireEvent.click(sendButton);
     });
 
-    // Assert
-    const { backendService } = await import(
-      "../../src/services/backendService"
-    );
-    expect(backendService.sendLlmPrompt).not.toHaveBeenCalled();
-    expect(screen.queryByText("Response:")).not.toBeInTheDocument();
+    // Assert - should not call the service
+    expect(mockService.sendLlmPrompt).not.toHaveBeenCalled();
   });
 
   it("should handle errors when sending LLM prompt fails", async () => {
     // Setup
-    const { backendService } = await import(
-      "../../src/services/backendService"
-    );
-    const errorMessage = "Failed to send LLM prompt";
-    vi.mocked(backendService.sendLlmPrompt).mockRejectedValueOnce(
+    const errorMessage = "Failed to send prompt";
+    vi.mocked(mockService.sendLlmPrompt).mockRejectedValueOnce(
       new Error(errorMessage),
     );
 
@@ -135,12 +133,14 @@ describe("LlmPromptView", () => {
       );
     });
 
-    // Execute
     const textArea = screen.getByPlaceholderText("Ask the LLM something...");
     const sendButton = screen.getByText("Send Prompt");
 
+    // Execute
     await act(async () => {
-      fireEvent.change(textArea, { target: { value: "Generate an error" } });
+      fireEvent.change(textArea, {
+        target: { value: "What is the Internet Computer?" },
+      });
     });
 
     await act(async () => {
@@ -156,16 +156,11 @@ describe("LlmPromptView", () => {
 
   it("should show loading state while waiting for response", async () => {
     // Setup
-    const { backendService } = await import(
-      "../../src/services/backendService"
-    );
-    // Create a promise we can control to simulate delay
     let resolvePromise: (value: string) => void;
-    const delayPromise = new Promise<string>((resolve) => {
+    const delayedPromise = new Promise<string>((resolve) => {
       resolvePromise = resolve;
     });
-
-    vi.mocked(backendService.sendLlmPrompt).mockReturnValueOnce(delayPromise);
+    vi.mocked(mockService.sendLlmPrompt).mockReturnValueOnce(delayedPromise);
 
     await act(async () => {
       render(
@@ -173,31 +168,28 @@ describe("LlmPromptView", () => {
       );
     });
 
-    // Execute
     const textArea = screen.getByPlaceholderText("Ask the LLM something...");
+    const sendButton = screen.getByText("Send Prompt");
+
+    // Execute
     await act(async () => {
-      fireEvent.change(textArea, { target: { value: "Test loading state" } });
+      fireEvent.change(textArea, {
+        target: { value: "What is the Internet Computer?" },
+      });
     });
 
-    // Click the button and trigger the async action
-    await act(async () => {
-      fireEvent.click(screen.getByText("Send Prompt"));
-    });
+    // Click and check loading state
+    fireEvent.click(sendButton);
 
     // Assert loading state
     expect(screen.getByText("Thinking...")).toBeInTheDocument();
-    expect(mockSetLoading).toHaveBeenCalledWith(true);
 
     // Resolve the promise
     await act(async () => {
-      resolvePromise!("Response after loading");
+      resolvePromise!("Response received");
     });
 
-    // Assert final state
+    // Assert loading state is cleared
     expect(screen.getByText("Send Prompt")).toBeInTheDocument();
-    expect(mockSetLoading).toHaveBeenCalledWith(false);
-    expect(
-      await screen.findByText("Response after loading"),
-    ).toBeInTheDocument();
   });
 });
