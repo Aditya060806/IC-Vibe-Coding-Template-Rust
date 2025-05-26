@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button, Card } from "../components";
-import { backendService } from "../services/backendService";
+import { createBackendService } from "../services/backendService";
+import { useBackendActors } from "../hooks";
 
 interface CounterViewProps {
   onError: (error: string) => void;
@@ -12,8 +13,21 @@ interface CounterViewProps {
  */
 export function CounterView({ onError, setLoading }: CounterViewProps) {
   const [count, setCount] = useState<bigint>(BigInt(0));
+  const { authenticatedActor, unauthenticatedActor, isAuthenticated } =
+    useBackendActors();
+
+  // Create backend service with authenticated actors
+  const backendService = createBackendService(
+    authenticatedActor,
+    unauthenticatedActor,
+  );
 
   const fetchCount = async () => {
+    if (!isAuthenticated) {
+      onError("Please sign in to access your counter");
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await backendService.getCount();
@@ -27,6 +41,11 @@ export function CounterView({ onError, setLoading }: CounterViewProps) {
   };
 
   const incrementCounter = async () => {
+    if (!isAuthenticated) {
+      onError("Please sign in to access your counter");
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await backendService.incrementCounter();
@@ -39,10 +58,12 @@ export function CounterView({ onError, setLoading }: CounterViewProps) {
     }
   };
 
-  // Fetch the initial count when component mounts
+  // Fetch the initial count when component mounts and user is authenticated
   useEffect(() => {
-    fetchCount();
-  }, []);
+    if (isAuthenticated) {
+      fetchCount();
+    }
+  }, [isAuthenticated]);
 
   return (
     <Card title={`Counter: ${count.toString()}`}>

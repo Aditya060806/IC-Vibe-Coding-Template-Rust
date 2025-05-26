@@ -1,6 +1,7 @@
 import { ChangeEvent, useState } from "react";
 import { Button, Card, InputField } from "../components";
-import { backendService } from "../services/backendService";
+import { createBackendService } from "../services/backendService";
+import { useBackendActors } from "../hooks";
 
 interface GreetingViewProps {
   onError: (error: string) => void;
@@ -13,6 +14,13 @@ interface GreetingViewProps {
 export function GreetingView({ onError, setLoading }: GreetingViewProps) {
   const [name, setName] = useState<string>("");
   const [response, setResponse] = useState<string>("");
+  const { authenticatedActor, unauthenticatedActor } = useBackendActors();
+
+  // Create backend service with actors
+  const backendService = createBackendService(
+    authenticatedActor,
+    unauthenticatedActor,
+  );
 
   const handleChangeText = (event: ChangeEvent<HTMLInputElement>): void => {
     if (!event?.target.value && event?.target.value !== "") {

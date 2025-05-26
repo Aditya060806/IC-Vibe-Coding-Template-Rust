@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add set_count update method to allow setting the counter to a specific value
 - Add frontend development server scripts (`npm run start`)
 - Add LLM canister implementation
+- Add IdentityKit integration for authenticated counter operations with delegation support
 
 ### Changed
 

@@ -1,2 +1,2 @@
 @import "tailwindcss";
-@import url("../../node_modules/@nfid/identitykit/dist/libs/react/index.css");
+@import "@nfid/identitykit/react/styles.css";

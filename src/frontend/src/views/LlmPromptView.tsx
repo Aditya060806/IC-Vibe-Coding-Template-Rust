@@ -1,6 +1,7 @@
 import { ChangeEvent, useState } from "react";
 import { Button, Card, TextArea } from "../components";
-import { backendService } from "../services/backendService";
+import { createBackendService } from "../services/backendService";
+import { useBackendActors } from "../hooks";
 
 interface LlmPromptViewProps {
   onError: (error: string) => void;
@@ -14,6 +15,13 @@ export function LlmPromptView({ onError, setLoading }: LlmPromptViewProps) {
   const [prompt, setPrompt] = useState<string>("");
   const [llmResponse, setLlmResponse] = useState<string>("");
   const [llmLoading, setLlmLoading] = useState(false);
+  const { authenticatedActor, unauthenticatedActor } = useBackendActors();
+
+  // Create backend service with actors
+  const backendService = createBackendService(
+    authenticatedActor,
+    unauthenticatedActor,
+  );
 
   const handleChangePrompt = (
     event: ChangeEvent<HTMLTextAreaElement>,
