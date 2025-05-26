@@ -2,59 +2,65 @@ import type { _SERVICE } from "../../../declarations/backend/backend.did";
 
 /**
  * Service for handling all backend canister API calls
- * This service now supports both authenticated and unauthenticated calls
+ * This service accepts a single backend actor and uses isAuthenticated flag for auth-required operations
  */
 export const createBackendService = (
-  authenticatedActor?: _SERVICE,
-  unauthenticatedActor?: _SERVICE,
+  backendActor?: _SERVICE,
+  isAuthenticated?: boolean,
 ) => ({
   /**
    * Sends a greeting to the backend and returns the response
-   * Uses unauthenticated actor as this is a public call
+   * This is a public call that doesn't require authentication
    * @param name Name to greet
    * @returns Promise with the greeting response
    */
   async greet(name: string): Promise<string> {
-    if (!unauthenticatedActor) {
+    if (!backendActor) {
       throw new Error("Backend service not ready");
     }
-    return await unauthenticatedActor.greet(name || "World");
+    return await backendActor.greet(name || "World");
   },
 
   /**
    * Fetches the current counter value for the authenticated user
-   * Uses authenticated actor as this is user-specific
+   * Requires authentication
    * @returns Promise with the current count
    */
   async getCount(): Promise<bigint> {
-    if (!authenticatedActor) {
+    if (!backendActor) {
+      throw new Error("Backend service not ready");
+    }
+    if (!isAuthenticated) {
       throw new Error("Authentication required for counter operations");
     }
-    return await authenticatedActor.get_count();
+    return await backendActor.get_count();
   },
 
   /**
    * Increments the counter for the authenticated user
-   * Uses authenticated actor as this is user-specific
+   * Requires authentication
    * @returns Promise with the new count
    */
   async incrementCounter(): Promise<bigint> {
-    if (!authenticatedActor) {
+    if (!backendActor) {
+      throw new Error("Backend service not ready");
+    }
+    if (!isAuthenticated) {
       throw new Error("Authentication required for counter operations");
     }
-    return await authenticatedActor.increment();
+    return await backendActor.increment();
   },
 
   /**
    * Sends a prompt to the LLM backend
-   * Uses unauthenticated actor as this is a public call
+   * This is a public call that doesn't require authentication
    * @param prompt The user's prompt text
    * @returns Promise with the LLM response
    */
   async sendLlmPrompt(prompt: string): Promise<string> {
-    if (!unauthenticatedActor) {
+    if (!backendActor) {
       throw new Error("Backend service not ready");
     }
-    return await unauthenticatedActor.prompt(prompt);
+    return await backendActor.prompt(prompt);
   },
 });

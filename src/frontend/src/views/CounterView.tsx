@@ -13,14 +13,10 @@ interface CounterViewProps {
  */
 export function CounterView({ onError, setLoading }: CounterViewProps) {
   const [count, setCount] = useState<bigint>(BigInt(0));
-  const { authenticatedActor, unauthenticatedActor, isAuthenticated } =
-    useBackendActors();
+  const { backendActor, isAuthenticated } = useBackendActors();
 
-  // Create backend service with authenticated actors
-  const backendService = createBackendService(
-    authenticatedActor,
-    unauthenticatedActor,
-  );
+  // Create backend service with actor
+  const backendService = createBackendService(backendActor, isAuthenticated);
 
   const fetchCount = async () => {
     if (!isAuthenticated) {

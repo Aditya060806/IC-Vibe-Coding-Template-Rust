@@ -15,13 +15,10 @@ export function LlmPromptView({ onError, setLoading }: LlmPromptViewProps) {
   const [prompt, setPrompt] = useState<string>("");
   const [llmResponse, setLlmResponse] = useState<string>("");
   const [llmLoading, setLlmLoading] = useState(false);
-  const { authenticatedActor, unauthenticatedActor } = useBackendActors();
+  const { backendActor, isAuthenticated } = useBackendActors();
 
-  // Create backend service with actors
-  const backendService = createBackendService(
-    authenticatedActor,
-    unauthenticatedActor,
-  );
+  // Create backend service with actor
+  const backendService = createBackendService(backendActor, isAuthenticated);
 
   const handleChangePrompt = (
     event: ChangeEvent<HTMLTextAreaElement>,

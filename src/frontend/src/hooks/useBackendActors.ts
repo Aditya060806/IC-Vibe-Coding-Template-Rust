@@ -15,7 +15,8 @@ const BACKEND_CANISTER_ID =
   process.env.CANISTER_ID_BACKEND || "bkyz2-fmaaa-aaaaa-qaaaq-cai";
 
 /**
- * Hook for creating authenticated and unauthenticated backend actors
+ * Hook for creating a backend actor that uses authenticated agent when available,
+ * otherwise falls back to unauthenticated agent
  */
 export function useBackendActors() {
   const [unauthenticatedAgent, setUnauthenticatedAgent] = useState<
@@ -43,30 +44,20 @@ export function useBackendActors() {
     createUnauthenticatedAgent();
   }, []);
 
-  // Create unauthenticated actor for public calls
-  const unauthenticatedActor = useMemo(() => {
-    if (!unauthenticatedAgent) return undefined;
+  // Create backend actor - prefer authenticated agent when available
+  const backendActor = useMemo(() => {
+    const agent = authenticatedAgent || unauthenticatedAgent;
+    if (!agent) return undefined;
 
     return Actor.createActor<_SERVICE>(idlFactory, {
-      agent: unauthenticatedAgent,
+      agent,
       canisterId: BACKEND_CANISTER_ID,
     });
-  }, [unauthenticatedAgent]);
-
-  // Create authenticated actor for user-specific calls
-  const authenticatedActor = useMemo(() => {
-    if (!authenticatedAgent) return undefined;
-
-    return Actor.createActor<_SERVICE>(idlFactory, {
-      agent: authenticatedAgent,
-      canisterId: BACKEND_CANISTER_ID,
-    });
-  }, [authenticatedAgent]);
+  }, [authenticatedAgent, unauthenticatedAgent]);
 
   return {
-    unauthenticatedActor,
-    authenticatedActor,
+    backendActor,
     isReady: !!unauthenticatedAgent,
-    isAuthenticated: !!authenticatedActor,
+    isAuthenticated: !!authenticatedAgent,
   };
 }

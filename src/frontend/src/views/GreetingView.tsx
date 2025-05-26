@@ -14,13 +14,10 @@ interface GreetingViewProps {
 export function GreetingView({ onError, setLoading }: GreetingViewProps) {
   const [name, setName] = useState<string>("");
   const [response, setResponse] = useState<string>("");
-  const { authenticatedActor, unauthenticatedActor } = useBackendActors();
+  const { backendActor, isAuthenticated } = useBackendActors();
 
-  // Create backend service with actors
-  const backendService = createBackendService(
-    authenticatedActor,
-    unauthenticatedActor,
-  );
+  // Create backend service with actor
+  const backendService = createBackendService(backendActor, isAuthenticated);
 
   const handleChangeText = (event: ChangeEvent<HTMLInputElement>): void => {
     if (!event?.target.value && event?.target.value !== "") {
