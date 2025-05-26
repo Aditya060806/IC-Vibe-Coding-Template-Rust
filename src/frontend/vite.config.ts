@@ -35,6 +35,24 @@ export default defineConfig({
     tailwindcss(),
     environment("all", { prefix: "CANISTER_" }),
     environment("all", { prefix: "DFX_" }),
+    {
+      name: "define-environment",
+      config: () => {
+        const network = process.env.DFX_NETWORK || "local";
+        const canisterId = process.env.CANISTER_ID_INTERNET_IDENTITY;
+        const internetIdentityUrl =
+          network === "local"
+            ? `http://${canisterId}.localhost:4943`
+            : "https://identity.ic0.app";
+
+        return {
+          define: {
+            "process.env.INTERNET_IDENTITY_URL":
+              JSON.stringify(internetIdentityUrl),
+          },
+        };
+      },
+    },
   ],
   resolve: {
     alias: [

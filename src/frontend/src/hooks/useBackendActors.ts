@@ -1,11 +1,11 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { useAgent } from "@nfid/identitykit/react";
-import { useEffect, useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { idlFactory } from "../../../declarations/backend";
 import type { _SERVICE } from "../../../declarations/backend/backend.did";
 
 // Environment configuration
-const isDevelopment = process.env.NODE_ENV === "development";
+const isDevelopment = process.env.DFX_NETWORK === "local";
 const ICP_API_HOST = isDevelopment
   ? "http://localhost:4943"
   : "https://icp-api.io/";
@@ -14,35 +14,51 @@ const ICP_API_HOST = isDevelopment
 const BACKEND_CANISTER_ID =
   process.env.CANISTER_ID_BACKEND || "bkyz2-fmaaa-aaaaa-qaaaq-cai";
 
+// Create unauthenticated agent singleton
+let unauthenticatedAgentCache: HttpAgent | null = null;
+
+const getUnauthenticatedAgent = async (): Promise<HttpAgent> => {
+  if (!unauthenticatedAgentCache) {
+    const agent = await HttpAgent.create({ host: ICP_API_HOST });
+
+    if (isDevelopment) {
+      await agent.fetchRootKey();
+    }
+
+    unauthenticatedAgentCache = agent;
+  }
+  return unauthenticatedAgentCache;
+};
+
 /**
  * Hook for creating a backend actor that uses authenticated agent when available,
  * otherwise falls back to unauthenticated agent
  */
 export function useBackendActors() {
-  const [unauthenticatedAgent, setUnauthenticatedAgent] = useState<
-    HttpAgent | undefined
-  >();
-  const authenticatedAgent = useAgent();
+  const [unauthenticatedAgent, setUnauthenticatedAgent] =
+    useState<HttpAgent | null>(null);
+  const authenticatedAgent = useAgent({ host: ICP_API_HOST });
 
-  // Create unauthenticated agent for public calls
+  // Initialize unauthenticated agent once
   useEffect(() => {
-    const createUnauthenticatedAgent = async () => {
-      try {
-        const agent = await HttpAgent.create({ host: ICP_API_HOST });
-
-        // Fetch root key for local development
-        if (isDevelopment) {
-          await agent.fetchRootKey();
-        }
-
-        setUnauthenticatedAgent(agent);
-      } catch (error) {
+    getUnauthenticatedAgent()
+      .then(setUnauthenticatedAgent)
+      .catch((error) => {
         console.error("Failed to create unauthenticated agent:", error);
-      }
-    };
-
-    createUnauthenticatedAgent();
+      });
   }, []);
+
+  // Prepare authenticated agent for development if needed
+  useEffect(() => {
+    if (authenticatedAgent && isDevelopment) {
+      authenticatedAgent.fetchRootKey().catch((error) => {
+        console.error(
+          "Failed to fetch root key for authenticated agent:",
+          error,
+        );
+      });
+    }
+  }, [authenticatedAgent]);
 
   // Create backend actor - prefer authenticated agent when available
   const backendActor = useMemo(() => {

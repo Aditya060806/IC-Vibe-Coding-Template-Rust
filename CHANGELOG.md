@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add frontend development server scripts (`npm run start`)
 - Add LLM canister implementation
 - Add IdentityKit integration for authenticated counter operations with delegation support
+- Add Internet Identity local deployment for development with IdentityKit
 
 ### Changed
 
