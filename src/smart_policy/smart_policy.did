@@ -1,0 +1,66 @@
+type PolicyStatus = variant {
+  Draft;
+  Active;
+  Paused;
+  UnderReview;
+  Completed;
+  Cancelled;
+};
+
+type FundFlowStatus = variant {
+  Pending;
+  Processing;
+  Completed;
+  Failed;
+};
+
+type Policy = record {
+  id : text;
+  title : text;
+  description : text;
+  category : text;
+  fund_allocation : nat64;
+  fund_released : nat64;
+  beneficiaries : nat32;
+  status : PolicyStatus;
+  created_at : nat64;
+  updated_at : nat64;
+  district : text;
+  contractor : opt text;
+  eligibility_criteria : vec text;
+  execution_conditions : vec text;
+  smart_contract_code : text;
+};
+
+type FundFlow = record {
+  id : text;
+  policy_id : text;
+  amount : nat64;
+  from_address : text;
+  to_address : text;
+  timestamp : nat64;
+  status : FundFlowStatus;
+  transaction_hash : opt text;
+};
+
+type PolicyExecution = record {
+  policy_id : text;
+  execution_date : nat64;
+  funds_released : nat64;
+  beneficiaries_reached : nat32;
+  success_rate : float64;
+  audit_score : float64;
+};
+
+service : {
+  "register_policy" : (text, text, text, nat64, text, vec text, vec text) -> (variant { Ok : text; Err : text });
+  "activate_policy" : (text) -> (variant { Ok; Err : text });
+  "release_funds" : (text, nat64, text) -> (variant { Ok : text; Err : text });
+  "get_policy" : (text) -> (variant { Ok : Policy; Err : text });
+  "get_all_policies" : () -> (vec Policy) query;
+  "get_policy_fund_flows" : (text) -> (vec FundFlow) query;
+  "get_policy_execution" : (text) -> (variant { Ok : PolicyExecution; Err : text }) query;
+  "update_policy_execution" : (text, nat32, float64, float64) -> (variant { Ok; Err : text });
+  "pause_policy" : (text) -> (variant { Ok; Err : text });
+  "resume_policy" : (text) -> (variant { Ok; Err : text });
+}; 

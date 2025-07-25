@@ -4,15 +4,60 @@
       "type": "pull",
       "id": "w36hm-eqaaa-aaaal-qr76a-cai"
     },
-    "backend": {
+    "smart_policy": {
       "dependencies": ["llm"],
-      "candid": "src/backend/backend.did",
-      "package": "backend",
+      "candid": "src/smart_policy/smart_policy.did",
+      "package": "smart_policy",
       "type": "custom",
       "shrink": true,
       "gzip": true,
-      "wasm": "target/wasm32-unknown-unknown/release/backend.wasm",
-      "build": ["bash ./scripts/generate-candid.sh backend"],
+      "wasm": "target/wasm32-unknown-unknown/release/smart_policy.wasm",
+      "build": ["bash ./scripts/generate-candid.sh smart_policy"],
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
+    },
+    "complaint_handler": {
+      "dependencies": ["llm"],
+      "candid": "src/complaint_handler/complaint_handler.did",
+      "package": "complaint_handler",
+      "type": "custom",
+      "shrink": true,
+      "gzip": true,
+      "wasm": "target/wasm32-unknown-unknown/release/complaint_handler.wasm",
+      "build": ["bash ./scripts/generate-candid.sh complaint_handler"],
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
+    },
+    "dao_manager": {
+      "dependencies": ["llm"],
+      "candid": "src/dao_manager/dao_manager.did",
+      "package": "dao_manager",
+      "type": "custom",
+      "shrink": true,
+      "gzip": true,
+      "wasm": "target/wasm32-unknown-unknown/release/dao_manager.wasm",
+      "build": ["bash ./scripts/generate-candid.sh dao_manager"],
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
+    },
+    "fund_tracker": {
+      "dependencies": ["llm"],
+      "candid": "src/fund_tracker/fund_tracker.did",
+      "package": "fund_tracker",
+      "type": "custom",
+      "shrink": true,
+      "gzip": true,
+      "wasm": "target/wasm32-unknown-unknown/release/fund_tracker.wasm",
+      "build": ["bash ./scripts/generate-candid.sh fund_tracker"],
       "metadata": [
         {
           "name": "candid:service"
@@ -20,9 +65,9 @@
       ]
     },
     "frontend": {
-      "dependencies": ["backend"],
+      "dependencies": ["smart_policy", "complaint_handler", "dao_manager", "fund_tracker"],
       "type": "assets",
-      "source": ["src/frontend/dist/"]
+      "source": ["../src/"]
     }
   },
   "output_env_file": ".env",

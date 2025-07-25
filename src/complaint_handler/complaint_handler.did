@@ -1,0 +1,64 @@
+type ComplaintPriority = variant {
+  Low;
+  Medium;
+  High;
+  Critical;
+};
+
+type ComplaintStatus = variant {
+  Submitted;
+  UnderReview;
+  Investigation;
+  Resolved;
+  Dismissed;
+  Escalated;
+};
+
+type AIAnalysis = record {
+  sentiment : text;
+  category_prediction : text;
+  priority_score : float64;
+  suggested_action : text;
+  confidence : float64;
+  keywords : vec text;
+};
+
+type Complaint = record {
+  id : text;
+  title : text;
+  description : text;
+  category : text;
+  priority : ComplaintPriority;
+  status : ComplaintStatus;
+  policy_id : opt text;
+  district : text;
+  location : opt text;
+  media_links : vec text;
+  citizen_id : text;
+  created_at : nat64;
+  updated_at : nat64;
+  ai_analysis : opt AIAnalysis;
+  audit_score : float64;
+  resolution_time : opt nat64;
+};
+
+type ComplaintMetrics = record {
+  total_complaints : nat32;
+  resolved_complaints : nat32;
+  average_resolution_time : float64;
+  category_distribution : vec record { text; nat32 };
+  district_distribution : vec record { text; nat32 };
+};
+
+service : {
+  "submit_complaint" : (text, text, text, ComplaintPriority, opt text, text, opt text, vec text, text) -> (variant { Ok : text; Err : text });
+  "update_complaint_status" : (text, ComplaintStatus) -> (variant { Ok; Err : text });
+  "get_complaint" : (text) -> (variant { Ok : Complaint; Err : text }) query;
+  "get_all_complaints" : () -> (vec Complaint) query;
+  "get_complaints_by_policy" : (text) -> (vec Complaint) query;
+  "get_complaints_by_district" : (text) -> (vec Complaint) query;
+  "get_complaint_metrics" : () -> (ComplaintMetrics) query;
+  "escalate_complaint" : (text) -> (variant { Ok; Err : text });
+  "add_audit_score" : (text, float64) -> (variant { Ok; Err : text });
+  "trigger_policy_pause" : (text) -> (variant { Ok; Err : text });
+}; 

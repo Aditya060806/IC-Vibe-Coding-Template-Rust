@@ -1,0 +1,79 @@
+type TransactionType = variant {
+  Allocation;
+  Release;
+  Transfer;
+  Refund;
+  Fee;
+};
+
+type TransactionStatus = variant {
+  Pending;
+  Processing;
+  Completed;
+  Failed;
+  Cancelled;
+};
+
+type FundTransaction = record {
+  id : text;
+  policy_id : text;
+  transaction_type : TransactionType;
+  amount : nat64;
+  from_address : text;
+  to_address : text;
+  timestamp : nat64;
+  status : TransactionStatus;
+  transaction_hash : text;
+  metadata : vec record { text; text };
+};
+
+type FundBalance = record {
+  policy_id : text;
+  total_allocated : nat64;
+  total_released : nat64;
+  total_transferred : nat64;
+  current_balance : nat64;
+  last_updated : nat64;
+};
+
+type DistrictFunds = record {
+  district : text;
+  total_allocated : nat64;
+  total_released : nat64;
+  active_policies : nat32;
+  completion_rate : float64;
+  last_updated : nat64;
+};
+
+type FundAnalytics = record {
+  total_funds_allocated : nat64;
+  total_funds_released : nat64;
+  total_transactions : nat32;
+  average_transaction_amount : float64;
+  district_distribution : vec record { text; nat64 };
+  category_distribution : vec record { text; nat64 };
+  monthly_trends : vec record { text; nat64 };
+  success_rate : float64;
+};
+
+type RealTimeMetrics = record {
+  current_time : nat64;
+  active_transactions : nat32;
+  pending_amount : nat64;
+  daily_volume : nat64;
+  weekly_volume : nat64;
+  monthly_volume : nat64;
+};
+
+service : {
+  "record_transaction" : (text, TransactionType, nat64, text, text, vec record { text; text }) -> (variant { Ok : text; Err : text });
+  "update_transaction_status" : (text, TransactionStatus) -> (variant { Ok; Err : text });
+  "get_transaction" : (text) -> (variant { Ok : FundTransaction; Err : text }) query;
+  "get_policy_transactions" : (text) -> (vec FundTransaction) query;
+  "get_fund_balance" : (text) -> (variant { Ok : FundBalance; Err : text }) query;
+  "get_district_funds" : (text) -> (variant { Ok : DistrictFunds; Err : text }) query;
+  "get_fund_analytics" : () -> (FundAnalytics) query;
+  "get_real_time_metrics" : () -> (RealTimeMetrics) query;
+  "get_recent_transactions" : (nat32) -> (vec FundTransaction) query;
+  "get_transactions_by_type" : (TransactionType) -> (vec FundTransaction) query;
+}; 

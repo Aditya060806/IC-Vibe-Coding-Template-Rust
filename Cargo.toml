@@ -1,5 +1,8 @@
 [workspace]
 members = [
-    "src/backend"
+    "src/smart_policy",
+    "src/complaint_handler", 
+    "src/dao_manager",
+    "src/fund_tracker"
 ]
 resolver = "2"

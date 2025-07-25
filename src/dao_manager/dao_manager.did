@@ -1,0 +1,91 @@
+type ProposalStatus = variant {
+  Draft;
+  Active;
+  Passed;
+  Rejected;
+  Executed;
+  Expired;
+};
+
+type VoteType = variant {
+  Yes;
+  No;
+  Abstain;
+};
+
+type MemberRole = variant {
+  Citizen;
+  PolicyMaker;
+  Auditor;
+  Contractor;
+  Admin;
+};
+
+type ProposalExecution = record {
+  executed_at : nat64;
+  executor : text;
+  execution_hash : text;
+  success : bool;
+  error_message : opt text;
+};
+
+type Proposal = record {
+  id : text;
+  title : text;
+  description : text;
+  category : text;
+  proposer : text;
+  created_at : nat64;
+  voting_start : nat64;
+  voting_end : nat64;
+  status : ProposalStatus;
+  yes_votes : nat32;
+  no_votes : nat32;
+  abstain_votes : nat32;
+  total_votes : nat32;
+  quorum_required : nat32;
+  execution_data : opt ProposalExecution;
+};
+
+type Vote = record {
+  proposal_id : text;
+  voter : text;
+  vote_type : VoteType;
+  voting_power : nat32;
+  timestamp : nat64;
+  reason : opt text;
+};
+
+type DAOMember = record {
+  id : text;
+  name : text;
+  voting_power : nat32;
+  joined_at : nat64;
+  total_votes_cast : nat32;
+  reputation_score : float64;
+  role : MemberRole;
+};
+
+type DAOMetrics = record {
+  total_proposals : nat32;
+  active_proposals : nat32;
+  passed_proposals : nat32;
+  total_members : nat32;
+  total_votes_cast : nat32;
+  average_participation : float64;
+};
+
+service : {
+  "create_proposal" : (text, text, text, text, nat64, nat32) -> (variant { Ok : text; Err : text });
+  "activate_proposal" : (text) -> (variant { Ok; Err : text });
+  "cast_vote" : (text, text, VoteType, nat32, opt text) -> (variant { Ok; Err : text });
+  "get_proposal" : (text) -> (variant { Ok : Proposal; Err : text }) query;
+  "get_all_proposals" : () -> (vec Proposal) query;
+  "get_active_proposals" : () -> (vec Proposal) query;
+  "get_proposal_votes" : (text) -> (vec Vote) query;
+  "execute_proposal" : (text, text) -> (variant { Ok; Err : text });
+  "add_member" : (text, text, nat32, MemberRole) -> (variant { Ok; Err : text });
+  "get_member" : (text) -> (variant { Ok : DAOMember; Err : text }) query;
+  "get_all_members" : () -> (vec DAOMember) query;
+  "get_dao_metrics" : () -> (DAOMetrics) query;
+}; 
