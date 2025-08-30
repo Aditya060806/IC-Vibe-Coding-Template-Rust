@@ -1,0 +1,165 @@
+type OptimizationType = variant {
+  SmartContractOptimization;
+  GasOptimization;
+  ComplianceOptimization;
+  PerformanceOptimization;
+  SecurityOptimization;
+  CostOptimization;
+};
+
+type OptimizationMetrics = record {
+  gas_savings : nat64;
+  performance_improvement : float64;
+  cost_reduction : float64;
+  security_score : float64;
+  compliance_score : float64;
+  efficiency_gain : float64;
+};
+
+type Priority = variant {
+  Critical;
+  High;
+  Medium;
+  Low;
+};
+
+type Difficulty = variant {
+  Easy;
+  Medium;
+  Hard;
+  Expert;
+};
+
+type ExecutionStep = record {
+  step_id : text;
+  title : text;
+  description : text;
+  order : nat32;
+  dependencies : vec text;
+  estimated_time : nat64;
+};
+
+type RiskLevel = variant {
+  Low;
+  Medium;
+  High;
+  Critical;
+};
+
+type RiskAssessment = record {
+  risk_level : RiskLevel;
+  potential_issues : vec text;
+  mitigation_strategies : vec text;
+  rollback_plan : text;
+};
+
+type ExecutionPlan = record {
+  plan_id : text;
+  steps : vec ExecutionStep;
+  estimated_duration : nat64;
+  required_resources : vec text;
+  risk_assessment : RiskAssessment;
+};
+
+type AIRecommendation = record {
+  recommendation_id : text;
+  title : text;
+  description : text;
+  priority : Priority;
+  estimated_impact : float64;
+  implementation_difficulty : Difficulty;
+  code_suggestions : vec text;
+};
+
+type OptimizationStatus = variant {
+  Pending;
+  InProgress;
+  Completed;
+  Failed;
+  RolledBack;
+};
+
+type AIOptimization = record {
+  optimization_id : text;
+  policy_id : text;
+  optimization_type : OptimizationType;
+  ai_model_version : text;
+  confidence_score : float64;
+  optimization_metrics : OptimizationMetrics;
+  recommendations : vec AIRecommendation;
+  execution_plan : ExecutionPlan;
+  timestamp : nat64;
+  status : OptimizationStatus;
+};
+
+type PredictionType = variant {
+  PolicySuccess;
+  FundUtilization;
+  ComplianceRisk;
+  PerformanceBottleneck;
+  SecurityThreat;
+  CostOverrun;
+};
+
+type PredictiveAnalytics = record {
+  analytics_id : text;
+  policy_id : text;
+  prediction_type : PredictionType;
+  predicted_outcome : text;
+  confidence_interval : float64;
+  factors : vec text;
+  timestamp : nat64;
+};
+
+type AlertSeverity = variant {
+  Info;
+  Warning;
+  Error;
+  Critical;
+};
+
+type Alert = record {
+  alert_id : text;
+  severity : AlertSeverity;
+  message : text;
+  timestamp : nat64;
+  resolved : bool;
+};
+
+type RealTimeMonitoring = record {
+  monitoring_id : text;
+  policy_id : text;
+  metrics : vec record { text; float64 };
+  alerts : vec Alert;
+  health_score : float64;
+  last_updated : nat64;
+};
+
+type SentimentType = variant {
+  Positive;
+  Neutral;
+  Negative;
+  Mixed;
+};
+
+type CitizenSentiment = record {
+  sentiment_id : text;
+  policy_id : text;
+  sentiment_score : float64;
+  sentiment_type : SentimentType;
+  feedback_count : nat32;
+  keywords : vec text;
+  timestamp : nat64;
+};
+
+service : {
+  "apply_ai_optimization" : (text, OptimizationType) -> (variant { Ok : AIOptimization; Err : text });
+  "generate_predictive_analytics" : (text, PredictionType) -> (variant { Ok : PredictiveAnalytics; Err : text });
+  "start_real_time_monitoring" : (text) -> (variant { Ok : RealTimeMonitoring; Err : text });
+  "analyze_citizen_sentiment" : (text) -> (variant { Ok : CitizenSentiment; Err : text });
+  "get_optimization" : (text) -> (opt AIOptimization) query;
+  "get_all_optimizations" : () -> (vec AIOptimization) query;
+  "get_predictive_analytics" : (text) -> (opt PredictiveAnalytics) query;
+  "get_real_time_monitoring" : (text) -> (opt RealTimeMonitoring) query;
+  "get_citizen_sentiment" : (text) -> (opt CitizenSentiment) query;
+};

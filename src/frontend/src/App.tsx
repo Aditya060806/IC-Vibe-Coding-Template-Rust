@@ -1,5 +1,4 @@
 import { useState } from "react";
-import ReactIcon from "../assets/React-icon.webp";
 
 // Import components and views
 import { Loader, ErrorDisplay } from "./components";
@@ -36,10 +35,10 @@ function App() {
           <div className="mb-8">
             <a href="https://reactjs.org" target="_blank" rel="noreferrer">
               <img
-                src={ReactIcon}
+                src={"/civic-logo.png"}
                 className="mx-auto h-24 p-6 will-change-[filter] hover:drop-shadow-[0_0_2em_#61dafbaa] motion-reduce:animate-none"
                 style={logoStyle}
-                alt="React logo"
+                alt="Civic Ledger logo"
               />
             </a>
           </div>
